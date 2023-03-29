@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deploy.name }}-deployment
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.deploy.name }}
+spec:
+  replicas: {{ .Values.deploy.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deploy.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deploy.name }}
+    spec:
+      containers:
+      - name: {{ .Values.deploy.name }}
+{{- if .Values.configmap.enabled }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Values.configmap.name }}
+{{- end }}
+        volumeMounts:
+{{- if .Values.configmap.mounth.enabled }}
+        {{- range $.Values.configmap.mounth.files }}
+        - name: config-volume
+          mountPath: {{ $.Values.configmap.mounth.workdir }}{{ . }}
+          subPath: {{ . }}
+        {{- end }}
+{{- end }}
+        image: {{ .Values.deploy.registry }}{{ .Values.deploy.image }}:{{ .Values.deploy.tag }}
+        imagePullPolicy: Always
+{{- if .Values.deploy.resources.enabled }}
+        resources:
+          requests:
+            cpu: {{ .Values.deploy.resources.requestCpu }}
+            memory: {{ .Values.deploy.resources.requestMemory }}
+          limits:
+            cpu: {{ .Values.deploy.resources.limitCpu }}
+            memory: {{ .Values.deploy.resources.limitMemory }}
+{{- end }}
+{{- if .Values.deploy.probe.enabled }}
+        readinessProbe:
+        {{- if .Values.deploy.probe.exec.enabled }}
+          exec:
+            command:
+          {{- range $.Values.deploy.probe.exec.execCommands }}
+            - {{ . }}
+          {{- end }}
+        {{- end }}
+        {{- if eq .Values.deploy.probe.exec.enabled false }}
+          {{- if eq .Values.deploy.probe.protocol "http" }}
+          httpGet:
+            path: {{ .Values.deploy.probe.readinessPath }}
+            port: {{ .Values.deploy.probe.port }}
+          {{- else }}
+          tcpSocket: 
+            port: {{ .Values.deploy.probe.port }}
+          {{- end }}
+        {{- end }}
+          initialDelaySeconds: {{ .Values.deploy.probe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.deploy.probe.timeoutSeconds }}
+        livenessProbe:
+        {{- if .Values.deploy.probe.exec.enabled }}
+          exec:
+            command:
+          {{- range $.Values.deploy.probe.exec.execCommands }}
+            - {{ . }}
+          {{- end }}
+        {{- end }}
+        {{- if eq .Values.deploy.probe.exec.enabled false }}
+          {{- if eq .Values.deploy.probe.protocol "http" }}
+          httpGet:
+            path: {{ .Values.deploy.probe.livenessPath }}
+            port: {{ .Values.deploy.probe.port }}
+          {{- else }}
+          tcpSocket: 
+            port: {{ .Values.deploy.probe.port }}
+          {{- end }}
+        {{- end }}
+          failureThreshold: {{ .Values.deploy.probe.failureThreshold }}
+          periodSeconds: {{ .Values.deploy.probe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.deploy.probe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.deploy.probe.timeoutSeconds }}
+{{- end }}
+        ports:
+        - containerPort: {{ .Values.deploy.targetPort }}
+      restartPolicy: Always
+      volumes:
+{{- if .Values.configmap.mounth.enabled }}
+      - name: config-volume
+        configMap:
+          name: {{ .Values.configmap.mounth.name }}
+{{- end }}

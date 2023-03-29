@@ -1,0 +1,137 @@
+namespace: default
+deploy:
+  name: app-name
+  replicas: 1
+  targetPort: 80
+  image: app-repository
+  tag: app-tag
+  registry: app-registry
+  # nodeSelector:
+  #   enabled: false
+  #   key: eks.amazonaws.com/nodegroup
+  #   InOrNotIn: In
+  #   value: spot
+  # toleration:
+  #   enabled: false
+  #   tolerations: 
+  #   - key: test
+  #     operator: Equal
+  #     value: true
+  #     effect: NoSchedule
+  resources:
+    enabled: false
+    requestCpu: 512m
+    requestMemory: 1000Mi
+    limitCpu: 1000m
+    limitMemory: 1536Mi
+  probe:
+    enabled: true
+    protocol: http
+    exec:
+      enabled: false
+      execCommands: []
+    failureThreshold: 3
+    periodSeconds: 5
+    timeoutSeconds: 5
+    initialDelaySeconds: 30
+    readinessPath: /
+    livenessPath: /
+    port: 80
+
+  # strategy:
+  #   enabled: false
+  #   type: RollingUpdate
+  #   maxUnavailable: '25%'
+  #   maxSurge: '75%'
+
+service:
+  enabled: false
+  type: NodePort
+  servicePorts: 
+    - name: default
+      port: 80
+      protocol: TCP
+      targetPort: 80 
+  # nlb:
+  #   enabled: false
+  #   nlbType: external
+  #   nlbScheme: internet-facing
+  #   nlbTargetType: ip
+  #   servicePorts:
+  #     - name: default
+  #       port: 80
+  #       protocol: TCP
+  #       targetPort: 80 
+
+hpa:
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+
+# privateIngress:
+#   enabled: false
+#   hosts: 
+#     - app-private-endpoint
+#   class: alb
+#   scheme: internal
+#   targetType: instance
+#   groupName: 
+#     enabled: false
+#     name: shared-private-alb
+#   idle_timeout:
+#     enabled: false
+#     value: 300
+#   healthcheck:
+#     enabled: false
+#     path: /
+#     successCodes: "200"
+
+# publicIngress:
+#   enabled: false
+#   ingresses:
+#     - name: ingress-name
+#       class: alb
+#       scheme: internet-facing
+#       targetType: instance
+#       groupName: 
+#         enabled: false
+#         name: shared-public-alb
+#       hosts:
+#         - app-public-endpoint
+#       healthcheck:
+#         enabled: false
+#         path: /
+#         successCodes: "200"
+#       idle_timeout:
+#         enabled: false
+#         idle_timeout_value: 300
+#       certificate_arn: aws-acm-arn
+#       waf:
+#         enabled: false
+#         arn: aws-waf-arn
+#       securityGroup: 
+#         enabled: false
+#         securityGroups: aws-sg-id
+#       sslPolicy: ELBSecurityPolicy-TLS-1-2-2017-01
+#       annotation:
+#         enabled: true
+#         annotations: 
+#           - name: ingress.kubernetes.io/rewrite-target
+#             value: /
+#           - name: alb.ingress.kubernetes.io/listen-ports
+#             value: '[{"HTTP": 80},{"HTTPS":443}]'
+#           - name: alb.ingress.kubernetes.io/actions.ssl-redirect
+#             value: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+
+configmap:
+  enabled: false
+  name: app-configmap-name
+  mounth:
+    enabled: false
+    name: app-configmap-name
+    workdir: /app/
+    files:
+      - appsettings.json
