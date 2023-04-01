@@ -13,7 +13,7 @@ deploy:
     limitCpu: 200m
     limitMemory: 256Mi
   probe:
-    enabled: true
+    enabled: false
     protocol: http
     exec:
       enabled: false
