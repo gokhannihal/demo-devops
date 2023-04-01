@@ -43,11 +43,11 @@ hpa:
     targetMemoryUtilizationPercentage: 70
 
 configmap:
-  enabled: false
+  enabled: true
   name: app-configmap-name
   mounth:
-    enabled: false
+    enabled: true
     name: app-configmap-name
     workdir: /app/
     files:
-      - appsettings.json
+      - .env

@@ -4,6 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Values.deploy.name }}-config
   namespace: {{ .Values.namespace }}
-data: 
-  {{- .Values.configValues | nindent 2 -}}
+data:
+  .env: |
+    {{- .Values.configValues | nindent 4 -}}
 {{- end }}
