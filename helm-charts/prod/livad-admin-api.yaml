@@ -43,11 +43,11 @@ hpa:
     targetMemoryUtilizationPercentage: 70
 
 configmap:
-  enabled: false
-  name: app-configmap-name
+  enabled: true
+  name: livad-admin-api-cm
   mounth:
-    enabled: false
-    name: app-configmap-name
+    enabled: true
+    name: livad-admin-api-cm
     workdir: /app/
     files:
-      - appsettings.json
+      - .env
