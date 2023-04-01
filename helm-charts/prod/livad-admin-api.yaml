@@ -1,0 +1,53 @@
+namespace: prod
+deploy:
+  name: livad-admin-api
+  replicas: 1
+  targetPort: 80
+  image: livad-admin-api
+  tag: v1.0.0
+  registry: eu.gcr.io/livad-311922/
+  resources:
+    enabled: true
+    requestCpu: 200m
+    requestMemory: 256Mi
+    limitCpu: 200m
+    limitMemory: 256Mi
+  probe:
+    enabled: true
+    protocol: http
+    exec:
+      enabled: false
+      execCommands: []
+    failureThreshold: 3
+    periodSeconds: 5
+    timeoutSeconds: 5
+    initialDelaySeconds: 30
+    readinessPath: /
+    livenessPath: /
+    port: 80
+
+service:
+  enabled: true
+  type: NodePort
+  servicePorts: 
+    - name: default
+      port: 80
+      protocol: TCP
+      targetPort: 80 
+hpa:
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+
+configmap:
+  enabled: false
+  name: app-configmap-name
+  mounth:
+    enabled: false
+    name: app-configmap-name
+    workdir: /app/
+    files:
+      - appsettings.json

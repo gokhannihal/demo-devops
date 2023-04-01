@@ -1,10 +1,10 @@
-namespace: prod
+namespace: test
 deploy:
   name: livad-admin-api
   replicas: 1
   targetPort: 80
-  image: livad-admin-api
-  tag: 3043e5331b590aa430c5725b8660edab9bfe03f7
+  image: livad-admin-api-test
+  tag: v1.0.0
   registry: eu.gcr.io/livad-311922/
   resources:
     enabled: true
